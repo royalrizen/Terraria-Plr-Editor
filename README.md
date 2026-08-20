@@ -1,36 +1,52 @@
-# Terraria Player / Plr Editor
+<p align="center">
+  <img src="https://i.ibb.co/KjWz408y/Untitled45-20260820132906.png" alt="Terraria Player Editor">
+</p>
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
-![License](https://img.shields.io/github/license/royalrizen/Terraria-Plr-Editor?style=flat)
-![GitHub Stars](https://img.shields.io/github/stars/royalrizen/Terraria-Plr-Editor?style=flat)
-![GitHub Issues](https://img.shields.io/github/issues/royalrizen/Terraria-Plr-Editor?style=flat)
+<h1 align="center">Terraria Player Editor</h1>
 
-A lightweight Python library and CLI for reading, inspecting, and editing Terraria `.plr` player files.
-Terraria Player Editor handles the underlying encryption and binary format, allowing player data to be accessed through a clean Python API instead of manually working with raw bytes. It includes a version-aware parser, bundled item database, inventory support, and an editor for supported player properties and inventory values.
+<p align="center">
+  A lightweight Python library and CLI for reading, inspecting, and editing Terraria <code>.plr</code> player files.
+</p>
 
-It can be used either as a **standalone command-line tool** or integrated directly into your own Python projects.
+<p align="center">
+  <a href="https://github.com/royalrizen/Terraria-Plr-Editor">
+    <img src="https://img.shields.io/github/stars/royalrizen/Terraria-Plr-Editor?style=flat&color=green" alt="Stars">
+  </a>
+  <a href="https://github.com/royalrizen/Terraria-Plr-Editor/issues">
+    <img src="https://img.shields.io/github/issues/royalrizen/Terraria-Plr-Editor?style=flat" alt="Issues">
+  </a>
+  <img src="https://img.shields.io/github/license/royalrizen/Terraria-Plr-Editor?style=flat" alt="License">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python">
+</p>
 
 <br>
+
+## About
+
+**Terraria Player Editor** is a Python library and command-line tool for working with Terraria `.plr` player files.
+
+It handles the underlying player-file encryption and binary data, providing a higher-level interface for inspecting player information, inventories, and supported character properties. The project includes a version-aware parser, a bundled Terraria item database, and an editor for modifying supported values before saving them back to a player file.
+
+The project can be used directly through the **CLI** or imported as a **Python package** for integration into other applications, scripts, or tools.
 
 > [!NOTE]
-> Terraria is developed by **Re-Logic**. This project is an independent community tool and is not affiliated with or endorsed by Re-Logic.
+> Terraria is developed by **Re-Logic**. This is an independent community project and is not affiliated with or endorsed by Re-Logic.
 
-<br>
-
+---
 
 ## 🎗️ Features
 
 | Feature | Description |
 |---|---|
-| 🔐 **Encryption** | Automatically decrypt and re-encrypt Terraria player files |
-| 📖 **Player Parser** | Parse supported Terraria `.plr` file versions |
-| 🎒 **Inventory** | Read items, quantities, prefixes, and favorite states |
-| 🧍 **Player Data** | Access character information, stats, difficulty, and other parsed data |
-| ✏️ **Player Editor** | Modify supported player properties and inventory slots |
-| 🗃️ **Item Database** | Resolve Terraria item IDs using the bundled database |
-| 🖥️ **CLI** | Inspect and edit player files directly from the terminal |
-| 🐍 **Python API** | Integrate the parser and editor into your own projects |
-| 💾 **Save** | Save edited data back into an encrypted `.plr` file |
+| 🔐 **Encryption** | Automatically decrypts and re-encrypts `.plr` files |
+| 📖 **Parser** | Parses supported Terraria player-file versions |
+| 🎒 **Inventory** | Reads item IDs, names, quantities, prefixes, and favorite states |
+| 🧍 **Player Data** | Accesses parsed character information and statistics |
+| ✏️ **Editor** | Modifies supported player properties and inventory values |
+| 🗃️ **Item Database** | Includes a bundled `items.json` database |
+| 🖥️ **CLI** | Provides a simple terminal interface |
+| 🐍 **Python API** | Use the parser and editor directly from Python |
+| 💾 **Save** | Saves edited player data back into an encrypted `.plr` file |
 
 ---
 
@@ -55,9 +71,13 @@ For development:
 pip install -e .
 ```
 
-## 🖥️ CLI Usage
+The package includes the item database, so no separate `items.json` argument is required.
 
-After installation, the `terraria-player` command is available globally.
+---
+
+## 🖥️ CLI
+
+After installation, use the `terraria-player` command.
 
 ### Help
 
@@ -83,25 +103,19 @@ terraria-player inventory player.plr
 terraria-player all player.plr
 ```
 
-The bundled `data/items.json` database is handled internally, so you **do not need to provide an `--items` argument**.
-
 ### Editing
 
 ```bash
 terraria-player edit player.plr
 ```
 
-The editor provides access to the supported player and inventory modifications.
-
-Edited player files are saved separately, with the original file preserved as a `.bak` backup when applicable.
+The CLI automatically locates the bundled item database.
 
 ---
 
 ## 🐍 Python API
 
-The parser and editor can also be used directly from Python.
-
-### Parse a player
+The parser can be used directly in your own project:
 
 ```python
 from terraria_player import PlayerParser
@@ -118,32 +132,21 @@ print(player["life"])
 print(player["max_life"])
 ```
 
-### Read inventory
+### Reading inventory
 
 ```python
-from terraria_player import PlayerParser
-
-parser = PlayerParser(
-    "player.plr",
-    "data/items.json",
-)
-
-player = parser.parse()
-
-for row, slots in enumerate(player["inventory"]):
-    for slot, item in enumerate(slots):
+for row_index, row in enumerate(player["inventory"]):
+    for slot_index, item in enumerate(row):
         if item is None:
             continue
 
         print(
-            f"[{row}:{slot}] "
-            f"{item.name} "
-            f"(ID {item.id}) "
-            f"x{item.count}"
+            f"[{row_index}:{slot_index}] "
+            f"{item.name} ×{item.count}"
         )
 ```
 
-### Edit a player
+### Editing a player
 
 ```python
 from terraria_player import PlayerParser, PlayerEditor
@@ -153,18 +156,16 @@ parser = PlayerParser(
     "data/items.json",
 )
 
-parser.parse()
-
 editor = PlayerEditor(parser)
 
-editor.set_name("My Character")
-editor.set_life(400)
+editor.set_name("Rizen")
+editor.set_life(200)
 editor.set_max_life(400)
 
-editor.save("edited.plr")
+editor.save("edited_player.plr")
 ```
 
-### Edit an inventory slot
+Inventory values can also be modified:
 
 ```python
 editor.set_inventory_item(
@@ -173,49 +174,6 @@ editor.set_inventory_item(
     count=99,
 )
 ```
-
-Supported inventory fields can also be changed together:
-
-```python
-editor.set_inventory_item(
-    row=0,
-    slot=0,
-    item_id=9,
-    count=99,
-    prefix=0,
-    favorite=True,
-)
-```
-
----
-
-## 📚 API
-
-### `PlayerParser`
-
-| Method | Description |
-|---|---|
-| `parse()` | Parse the player file |
-| `decrypt()` | Decrypt the player file |
-| `read_inventory()` | Read the main inventory |
-| `read_loadouts()` | Read player loadouts |
-| `read_buffs()` | Read active buffs |
-| `read_spawn_points()` | Read spawn points |
-
-### `PlayerEditor`
-
-| Method | Description |
-|---|---|
-| `set_name()` | Change the player name |
-| `set_hair_style()` | Change the hair style |
-| `set_hair_dye()` | Change the hair dye |
-| `set_team()` | Change the team |
-| `set_life()` | Change current life |
-| `set_max_life()` | Change maximum life |
-| `set_mana()` | Change current mana |
-| `set_max_mana()` | Change maximum mana |
-| `set_inventory_item()` | Modify an inventory slot |
-| `save()` | Save the edited player file |
 
 ---
 
@@ -227,53 +185,67 @@ Terraria-Plr-Editor/
 │   └── items.json
 ├── src/
 │   └── terraria_player/
-│       ├── binary/
 │       ├── cli/
-│       ├── crypto/
-│       ├── database/
-│       ├── editor/
-│       ├── models/
-│       └── parser/
+│       ├── crypto.py
+│       ├── parser.py
+│       └── editor.py
 ├── pyproject.toml
-└── README.md
+├── README.md
+└── LICENSE
 ```
 
-<br>
+---
 
 ## 🤝 Contributing
 
-Contributions are always welcome.
+Contributions are welcome.
 
-If you have a bug fix, improvement, or new idea:
+If you have a bug fix, improvement, or useful feature:
 
-1. Fork the repository
-2. Create a branch for your changes
-3. Make and test your changes
-4. Open a pull request with a clear description
+1. Fork the repository.
+2. Create a branch for your change.
+3. Make your changes.
+4. Test them with a Terraria `.plr` file.
+5. Open a pull request with a clear description.
 
-For larger changes to the parser or player format, please open an issue first so the approach can be discussed.
+```bash
+git checkout -b feature/my-change
+```
 
-### 🐛 Bugs & Ideas
+For larger parser or file-format changes, opening an issue first is recommended.
 
-Found a bug or have a feature idea?
+### 🐛 Bug Reports
 
-[Open an issue →](https://github.com/royalrizen/Terraria-Plr-Editor/issues/new)
+Please include:
 
-When reporting a bug, include the relevant Terraria/player-file version, Python version, error message, and steps to reproduce it.
+- Terraria/player-file version
+- Python version
+- Command or code used
+- Full error message
+- Steps to reproduce the issue
 
 > [!WARNING]
-> Please don't upload personal `.plr` files to public issues.
+> Please do not upload personal `.plr` files publicly.
+
+### 💡 Feature Requests
+
+Have an idea?
+
+[Open an issue](https://github.com/royalrizen/Terraria-Plr-Editor/issues/new) and describe what you'd like to see and why it would be useful.
 
 ---
 
 ## 📜 License
 
-This project is under the [MIT LICENSE](LICENSE).
+This project is licensed under the **MIT License**.
+See [LICENSE](LICENSE) for the full license text.
+
+---
 
 ## ✨ Credits
 
-- **[@royalrizen](https://github.com/royalrizen)**
+Created and maintained by **[@royalrizen](https://github.com/royalrizen)**.
 
 <p align="center">
-  <sub>Built for the Terraria Community · Made with ♥️</sub>
+  <sub>Made with ♥️ · For Terraria Community</sub>
 </p>
