@@ -2,19 +2,15 @@
   <img src="https://i.ibb.co/KjWz408y/Untitled45-20260820132906.png" alt="Terraria Player Editor">
 </p>
 
-<h1 align="center">Terraria Player Editor</h1>
+<h1 align="center">Terraria Player / Plr Editor</h1>
 
 <p align="center">
-  A lightweight Python library and CLI for reading, inspecting, and editing Terraria <code>.plr</code> player files.
+  A lightweight Python library and CLI for reading, inspecting, and editing Terraria player files.
 </p>
 
 <p align="center">
-  <a href="https://github.com/royalrizen/Terraria-Plr-Editor">
-    <img src="https://img.shields.io/github/stars/royalrizen/Terraria-Plr-Editor?style=flat&color=green" alt="Stars">
-  </a>
-  <a href="https://github.com/royalrizen/Terraria-Plr-Editor/issues">
-    <img src="https://img.shields.io/github/issues/royalrizen/Terraria-Plr-Editor?style=flat" alt="Issues">
-  </a>
+  <img src="https://img.shields.io/github/stars/royalrizen/Terraria-Plr-Editor?style=flat&color=green" alt="Stars">
+  <img src="https://img.shields.io/github/issues/royalrizen/Terraria-Plr-Editor?style=flat" alt="Issues">
   <img src="https://img.shields.io/github/license/royalrizen/Terraria-Plr-Editor?style=flat" alt="License">
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python">
 </p>
