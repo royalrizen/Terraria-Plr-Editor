@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "terraria-player"
+version = "0.1.0"
+description = "A Python library and CLI for reading and editing Terraria player files."
+requires-python = ">=3.10"
+dependencies = [
+    "pycryptodome",
+]
+
+[project.scripts]
+terraria-player = "terraria_player.cli.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
