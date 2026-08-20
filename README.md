@@ -173,25 +173,6 @@ editor.set_inventory_item(
 
 ---
 
-## 📁 Project Structure
-
-```text
-Terraria-Plr-Editor/
-├── data/
-│   └── items.json
-├── src/
-│   └── terraria_player/
-│       ├── cli/
-│       ├── crypto.py
-│       ├── parser.py
-│       └── editor.py
-├── pyproject.toml
-├── README.md
-└── LICENSE
-```
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome.
