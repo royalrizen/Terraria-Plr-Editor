@@ -173,6 +173,36 @@ editor.set_inventory_item(
 
 ---
 
+## 📚 API
+
+### PlayerParser
+
+| Method | Description |
+|---|---|
+| `parse()` | Parse the player file |
+| `decrypt()` | Decrypt the player file |
+| `read_inventory()` | Read the main inventory |
+| `read_loadouts()` | Read player loadouts |
+| `read_buffs()` | Read active buffs |
+| `read_spawn_points()` | Read spawn points |
+
+### PlayerEditor
+
+| Method | Description |
+|---|---|
+| `set_name()` | Change the player name |
+| `set_hair_style()` | Change the hair style |
+| `set_hair_dye()` | Change the hair dye |
+| `set_team()` | Change the team |
+| `set_life()` | Change current life |
+| `set_max_life()` | Change maximum life |
+| `set_mana()` | Change current mana |
+| `set_max_mana()` | Change maximum mana |
+| `set_inventory_item()` | Modify an inventory slot |
+| `save()` | Save the edited player file |
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome.
