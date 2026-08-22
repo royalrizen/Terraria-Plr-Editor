@@ -2,7 +2,7 @@
   <img src="https://i.ibb.co/KjWz408y/Untitled45-20260820132906.png" alt="Terraria Player Editor">
 </p>
 
-<h1 align="center">Terraria Player / .plr Editor</h1>
+<h1 align="center">Terraria Player / .plr Editor (1.4.5.6) </h1>
 
 <p align="center">
   A lightweight Python library and CLI for reading, inspecting, and editing Terraria player files.
