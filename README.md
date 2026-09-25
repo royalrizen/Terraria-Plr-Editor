@@ -2,8 +2,6 @@
 <h1 align="center">Terraria Player / .plr Editor (1.4.5.6) </h1>
 
 <p align="center">
-  
-**Terraria Player Editor** is a Python library and command-line tool for working with Terraria player files. The project includes a version-aware parser, a bundled Terraria item database, and an editor for modifying supported values before saving them back to a player file.
 
 The project can be used directly through the **CLI** or imported as a **Python package** for integration into other applications, scripts, or tools.
 
