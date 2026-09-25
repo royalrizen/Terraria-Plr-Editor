@@ -1,52 +1,20 @@
-<p align="center">
-  <img src="https://i.ibb.co/KjWz408y/Untitled45-20260820132906.png" alt="Terraria Player Editor">
-</p>
 
 <h1 align="center">Terraria Player / .plr Editor (1.4.5.6) </h1>
 
 <p align="center">
-  A lightweight Python library and CLI for reading, inspecting, and editing Terraria player files.
-</p>
+  
+**Terraria Player Editor** is a Python library and command-line tool for working with Terraria player files. The project includes a version-aware parser, a bundled Terraria item database, and an editor for modifying supported values before saving them back to a player file.
 
-<p align="center">
-  <img src="https://img.shields.io/github/stars/royalrizen/Terraria-Plr-Editor?style=flat&color=green" alt="Stars">
-  <img src="https://img.shields.io/github/issues/royalrizen/Terraria-Plr-Editor?style=flat" alt="Issues">
-  <img src="https://img.shields.io/github/license/royalrizen/Terraria-Plr-Editor?style=flat" alt="License">
-  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python">
+The project can be used directly through the **CLI** or imported as a **Python package** for integration into other applications, scripts, or tools.
+
 </p>
 
 <br>
 
-## About
-
-**Terraria Player Editor** is a Python library and command-line tool for working with Terraria `.plr` player files.
-
-It handles the underlying player-file encryption and binary data, providing a higher-level interface for inspecting player information, inventories, and supported character properties. The project includes a version-aware parser, a bundled Terraria item database, and an editor for modifying supported values before saving them back to a player file.
-
-The project can be used directly through the **CLI** or imported as a **Python package** for integration into other applications, scripts, or tools.
-
 > [!NOTE]
 > Terraria is developed by **Re-Logic**. This is an independent community project and is not affiliated with or endorsed by Re-Logic.
 
----
-
-## 🎗️ Features
-
-| Feature | Description |
-|---|---|
-| 🔐 **Encryption** | Automatically decrypts and re-encrypts `.plr` files |
-| 📖 **Parser** | Parses supported Terraria player-file versions |
-| 🎒 **Inventory** | Reads item IDs, names, quantities, prefixes, and favorite states |
-| 🧍 **Player Data** | Accesses parsed character information and statistics |
-| ✏️ **Editor** | Modifies supported player properties and inventory values |
-| 🗃️ **Item Database** | Includes a bundled `items.json` database |
-| 🖥️ **CLI** | Provides a simple terminal interface |
-| 🐍 **Python API** | Use the parser and editor directly from Python |
-| 💾 **Save** | Saves edited player data back into an encrypted `.plr` file |
-
----
-
-## 📦 Installation
+## Installation
 
 Clone the repository:
 
@@ -71,7 +39,7 @@ The package includes the item database, so no separate `items.json` argument is 
 
 ---
 
-## 🖥️ CLI
+## CLI
 
 After installation, use the `terraria-player` command.
 
@@ -109,7 +77,7 @@ The CLI automatically locates the bundled item database.
 
 ---
 
-## 🐍 Python API
+## Python API
 
 The parser can be used directly in your own project:
 
@@ -173,7 +141,7 @@ editor.set_inventory_item(
 
 ---
 
-## 📚 API
+## API
 
 ### PlayerParser
 
@@ -200,59 +168,3 @@ editor.set_inventory_item(
 | `set_max_mana()` | Change maximum mana |
 | `set_inventory_item()` | Modify an inventory slot |
 | `save()` | Save the edited player file |
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome.
-
-If you have a bug fix, improvement, or useful feature:
-
-1. Fork the repository.
-2. Create a branch for your change.
-3. Make your changes.
-4. Test them with a Terraria `.plr` file.
-5. Open a pull request with a clear description.
-
-```bash
-git checkout -b feature/my-change
-```
-
-For larger parser or file-format changes, opening an issue first is recommended.
-
-### 🐛 Bug Reports
-
-Please include:
-
-- Terraria/player-file version
-- Python version
-- Command or code used
-- Full error message
-- Steps to reproduce the issue
-
-> [!WARNING]
-> Please do not upload personal `.plr` files publicly.
-
-### 💡 Feature Requests
-
-Have an idea?
-
-[Open an issue](https://github.com/royalrizen/Terraria-Plr-Editor/issues/new) and describe what you'd like to see and why it would be useful.
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**.
-See [LICENSE](LICENSE) for the full license text.
-
----
-
-## ✨ Credits
-
-Created and maintained by **[@royalrizen](https://github.com/royalrizen)**.
-
-<p align="center">
-  <sub>Made with ♥️ · For Terraria Community</sub>
-</p>
