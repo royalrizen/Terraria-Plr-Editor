@@ -18,43 +18,26 @@ from terraria_player.models import ParsedItem
 
 
 class PlayerParser:
-
     def __init__(
         self,
         player_file: str | Path,
         items_file: str | Path,
     ):
         self.player_file = Path(player_file)
-
-        self.items = ItemDatabase(
-            items_file
-        )
-
+        self.items = ItemDatabase(items_file)
         self.version = 0
-
         self.edit_offsets: dict[Any, Any] = {}
 
     def decrypt(self) -> bytes:
-        return decrypt_player(
-            self.player_file.read_bytes()
-        )
+        return decrypt_player(self.player_file.read_bytes())
 
-    def get_item(
-        self,
-        item_id: int,
-    ):
+    def get_item(self, item_id: int):
         return self.items.get(item_id)
 
-    def read_item(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_item(self, reader: BinaryReader):
         if self.version < 38:
             internal_name = reader.cs_string()
-
-            return self.items.get_by_name(
-                internal_name
-            )
+            return self.items.get_by_name(internal_name)
 
         item_id = reader.i32()
 
@@ -63,19 +46,13 @@ class PlayerParser:
 
         return self.items.get(item_id)
 
-    def read_prefix(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_prefix(self, reader: BinaryReader):
         if self.version < 36:
             return None
 
         return reader.u8()
 
-    def item_id(
-        self,
-        item,
-    ):
+    def item_id(self, item):
         if item is None:
             return -1
 
@@ -98,23 +75,15 @@ class PlayerParser:
         return ParsedItem(
             id=self.item_id(item),
             name=item.get("name", ""),
-            internal_name=item.get(
-                "internalName",
-                "",
-            ),
+            internal_name=item.get("internalName", ""),
             count=count,
             prefix=prefix,
             favorite=favorite,
         )
 
-    def read_item_slot(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_item_slot(self, reader: BinaryReader):
         item = self.read_item(reader)
-
         count = reader.i32()
-
         prefix = self.read_prefix(reader)
 
         if item is None:
@@ -123,11 +92,7 @@ class PlayerParser:
         if count <= 0:
             return None
 
-        return self.make_item(
-            item,
-            count=count,
-            prefix=prefix,
-        )
+        return self.make_item(item, count=count, prefix=prefix)
 
     def read_inventory_slot(
         self,
@@ -135,7 +100,6 @@ class PlayerParser:
         favorite_enabled,
     ):
         item = self.read_item_slot(reader)
-
         favorite = False
 
         if favorite_enabled:
@@ -145,40 +109,25 @@ class PlayerParser:
             return None
 
         item.favorite = favorite
-
         return item
 
-    def read_single_item_slot(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_single_item_slot(self, reader: BinaryReader):
         item = self.read_item(reader)
-
         prefix = self.read_prefix(reader)
 
         if item is None:
             return None
 
-        return self.make_item(
-            item,
-            count=1,
-            prefix=prefix,
-        )
+        return self.make_item(item, count=1, prefix=prefix)
 
-    def read_color(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_color(self, reader: BinaryReader):
         return [
             reader.u8(),
             reader.u8(),
             reader.u8(),
         ]
 
-    def read_difficulty(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_difficulty(self, reader: BinaryReader):
         if self.version <= 10:
             return "SoftCore"
 
@@ -194,21 +143,10 @@ class PlayerParser:
             1: "MediumCore",
             2: "Hardcore",
             3: "Journey",
-        }.get(
-            reader.u8(),
-            "SoftCore",
-        )
+        }.get(reader.u8(), "SoftCore")
 
-    def read_inventory(
-        self,
-        reader: BinaryReader,
-    ):
-        rows = (
-            4
-            if self.version < 58
-            else 5
-        )
-
+    def read_inventory(self, reader: BinaryReader):
+        rows = 4 if self.version < 58 else 5
         result = []
 
         for row_index in range(rows):
@@ -216,11 +154,8 @@ class PlayerParser:
 
             for slot_index in range(10):
                 item_id_offset = reader.tell()
-
                 item = self.read_item(reader)
-
                 count_offset = reader.tell()
-
                 count = reader.i32()
 
                 prefix_offset = None
@@ -228,7 +163,6 @@ class PlayerParser:
 
                 if self.version >= 36:
                     prefix_offset = reader.tell()
-
                     prefix = reader.u8()
 
                 favorite_offset = None
@@ -236,15 +170,10 @@ class PlayerParser:
 
                 if self.version >= 114:
                     favorite_offset = reader.tell()
-
                     favorite = reader.boolean()
 
                 self.edit_offsets[
-                    (
-                        "inventory",
-                        row_index,
-                        slot_index,
-                    )
+                    ("inventory", row_index, slot_index)
                 ] = {
                     "item_id": item_id_offset,
                     "count": count_offset,
@@ -268,10 +197,7 @@ class PlayerParser:
 
         return result
 
-    def read_small_inventory(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_small_inventory(self, reader: BinaryReader):
         return [
             self.read_inventory_slot(
                 reader,
@@ -280,25 +206,15 @@ class PlayerParser:
             for _ in range(4)
         ]
 
-    def read_container(
-        self,
-        reader: BinaryReader,
-    ):
-        columns = (
-            10
-            if self.version >= 58
-            else 5
-        )
-
+    def read_container(self, reader: BinaryReader):
+        columns = 10 if self.version >= 58 else 5
         result = []
 
         for _ in range(4):
             row = []
 
             for _ in range(columns):
-                row.append(
-                    self.read_item_slot(reader)
-                )
+                row.append(self.read_item_slot(reader))
 
             while len(row) < 10:
                 row.append(None)
@@ -307,10 +223,7 @@ class PlayerParser:
 
         return result
 
-    def read_void_vault(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_void_vault(self, reader: BinaryReader):
         inventory = [
             [None for _ in range(10)]
             for _ in range(4)
@@ -319,11 +232,9 @@ class PlayerParser:
         if self.version >= 198:
             for row in range(4):
                 for col in range(10):
-                    inventory[row][col] = (
-                        self.read_inventory_slot(
-                            reader,
-                            self.version >= 255,
-                        )
+                    inventory[row][col] = self.read_inventory_slot(
+                        reader,
+                        self.version >= 255,
                     )
 
         unlocked = False
@@ -343,10 +254,7 @@ class PlayerParser:
 
         return inventory
 
-    def read_buffs(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_buffs(self, reader: BinaryReader):
         if self.version < 11:
             return []
 
@@ -361,23 +269,17 @@ class PlayerParser:
 
         for _ in range(count):
             buff_id = reader.i32()
-
             buff_time_ticks = reader.i32()
 
             buffs.append({
                 "id": buff_id,
                 "time_ticks": buff_time_ticks,
-                "time_seconds": (
-                    buff_time_ticks / 60.0
-                ),
+                "time_seconds": buff_time_ticks / 60.0,
             })
 
         return buffs
 
-    def read_spawn_points(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_spawn_points(self, reader: BinaryReader):
         result = []
 
         for _ in range(200):
@@ -387,9 +289,7 @@ class PlayerParser:
                 break
 
             y = reader.i32()
-
             world_id = reader.i32()
-
             world_name = reader.cs_string()
 
             result.append({
@@ -401,25 +301,16 @@ class PlayerParser:
 
         return result
 
-    def read_visibility(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_visibility(self, reader: BinaryReader):
         value = reader.i32()
 
         return {
             0: "Bright",
             1: "Faded",
             2: "Classic",
-        }.get(
-            value,
-            "Bright",
-        )
+        }.get(value, "Bright")
 
-    def read_loadout(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_loadout(self, reader: BinaryReader):
         loadout = {
             "armor": [],
             "vanity": [],
@@ -428,42 +319,28 @@ class PlayerParser:
         }
 
         for _ in range(3):
-            loadout["armor"].append(
-                self.read_item_slot(reader)
-            )
+            loadout["armor"].append(self.read_item_slot(reader))
 
         for _ in range(7):
-            loadout["armor"].append(
-                self.read_item_slot(reader)
-            )
+            loadout["armor"].append(self.read_item_slot(reader))
 
         for _ in range(3):
-            loadout["vanity"].append(
-                self.read_item_slot(reader)
-            )
+            loadout["vanity"].append(self.read_item_slot(reader))
 
         for _ in range(7):
-            loadout["vanity"].append(
-                self.read_item_slot(reader)
-            )
+            loadout["vanity"].append(self.read_item_slot(reader))
 
         for _ in range(3):
-            loadout["dyes"].append(
-                self.read_item_slot(reader)
-            )
+            loadout["dyes"].append(self.read_item_slot(reader))
 
         for _ in range(7):
-            loadout["dyes"].append(
-                self.read_item_slot(reader)
-            )
+            loadout["dyes"].append(self.read_item_slot(reader))
 
         for _ in range(3):
             reader.boolean()
 
         for _ in range(7):
-            loadout[
-                "accessory_visibility"
-            ].append(
+            loadout["accessory_visibility"].append(
                 not reader.boolean()
             )
 
@@ -475,13 +352,10 @@ class PlayerParser:
         current_loadout,
     ):
         selected = reader.i32()
-
         loadouts = []
 
         for _ in range(3):
-            loadouts.append(
-                self.read_loadout(reader)
-            )
+            loadouts.append(self.read_loadout(reader))
 
         return {
             "selected_loadout": selected,
@@ -489,28 +363,22 @@ class PlayerParser:
             "current_loadout": current_loadout,
         }
 
-    def read_player_header(
-        self,
-        reader: BinaryReader,
-    ):
+    def read_player_header(self, reader: BinaryReader):
         magic = reader.read(7)
 
         if magic != MAGIC_NUMBER:
             raise ValueError(
-                f"Invalid Terraria magic number: "
-                f"{magic!r}"
+                f"Invalid Terraria magic number: {magic!r}"
             )
 
         file_type = reader.u8()
 
         if file_type != 3:
             raise ValueError(
-                f"Not a Terraria player file: "
-                f"{file_type}"
+                f"Not a Terraria player file: {file_type}"
             )
 
         times_saved = reader.i32()
-
         favorite = reader.i64() != 0
 
         return {
@@ -520,9 +388,7 @@ class PlayerParser:
 
     def parse(self):
         data = self.decrypt()
-
         reader = BinaryReader(data)
-
         self.version = reader.i32()
 
         if self.version not in SUPPORTED_VERSIONS:
@@ -538,49 +404,29 @@ class PlayerParser:
         version = self.version
 
         if version >= 135:
-            header = self.read_player_header(
-                reader
-            )
-
+            header = self.read_player_header(reader)
             player.update(header)
 
         self.edit_offsets["name"] = reader.tell()
-
         player["name"] = reader.cs_string()
-
-        player["difficulty"] = (
-            self.read_difficulty(reader)
-        )
+        player["difficulty"] = self.read_difficulty(reader)
 
         if version >= 138:
             ticks = reader.i64()
-
             player["playtime_ticks"] = ticks
+            player["playtime_seconds"] = ticks / 10000000
 
-            player["playtime_seconds"] = (
-                ticks / 10000000
-            )
-
-        self.edit_offsets["hair_style"] = (
-            reader.tell()
-        )
-
+        self.edit_offsets["hair_style"] = reader.tell()
         player["hair_style"] = reader.i32()
 
         if version >= 83:
-            self.edit_offsets["hair_dye"] = (
-                reader.tell()
-            )
-
+            self.edit_offsets["hair_dye"] = reader.tell()
             player["hair_dye"] = reader.u8()
         else:
             player["hair_dye"] = None
 
         if version >= 283:
-            self.edit_offsets["team"] = (
-                reader.tell()
-            )
-
+            self.edit_offsets["team"] = reader.tell()
             player["team"] = reader.u8()
         else:
             player["team"] = None
@@ -595,40 +441,28 @@ class PlayerParser:
             player["accessory_visibility"] = []
 
             for _ in range(7):
-                player[
-                    "accessory_visibility"
-                ].append(
+                player["accessory_visibility"].append(
                     (visibility & 1) != 1
                 )
-
                 visibility >>= 1
 
         if version >= 119:
             byte = reader.u8()
-
-            player["pet_visible"] = (
-                byte & 1
-            ) != 1
-
-            player["light_pet_visible"] = (
-                (byte >> 1) & 1
-            ) != 1
+            player["pet_visible"] = (byte & 1) != 1
+            player["light_pet_visible"] = ((byte >> 1) & 1) != 1
 
         if version <= 17:
             player["style"] = (
                 "FemaleStarter"
-                if player["hair_style"]
-                in (5, 6, 9, 11)
+                if player["hair_style"] in (5, 6, 9, 11)
                 else "MaleStarter"
             )
-
         elif version <= 107:
             player["style"] = (
                 "MaleStarter"
                 if reader.boolean()
                 else "FemaleStarter"
             )
-
         else:
             style_id = reader.u8()
 
@@ -649,25 +483,15 @@ class PlayerParser:
                 9: "FemaleDress",
                 10: "MaleDisplayDoll",
                 11: "FemaleDisplayDoll",
-            }.get(
-                style_id,
-                f"Unknown Style ({style_id})",
-            )
+            }.get(style_id, f"Unknown Style ({style_id})")
 
         self.edit_offsets["life"] = reader.tell()
-
         player["life"] = reader.i32()
-
         self.edit_offsets["max_life"] = reader.tell()
-
         player["max_life"] = reader.i32()
-
         self.edit_offsets["mana"] = reader.tell()
-
         player["mana"] = reader.i32()
-
         self.edit_offsets["max_mana"] = reader.tell()
-
         player["max_mana"] = reader.i32()
 
         if version >= 125:
@@ -677,7 +501,6 @@ class PlayerParser:
 
         if version >= 229:
             biome_torches_unlocked = reader.boolean()
-
             reader.boolean()
 
         if version >= 256:
@@ -698,13 +521,8 @@ class PlayerParser:
             player["tax_money"] = reader.i32()
 
         if version >= 254:
-            player[
-                "deaths_not_caused_by_player"
-            ] = reader.i32()
-
-            player[
-                "deaths_caused_by_player"
-            ] = reader.i32()
+            player["deaths_not_caused_by_player"] = reader.i32()
+            player["deaths_caused_by_player"] = reader.i32()
 
         colors = [
             "hair",
@@ -719,9 +537,7 @@ class PlayerParser:
         player["colors"] = {}
 
         for color in colors:
-            player["colors"][color] = (
-                self.read_color(reader)
-            )
+            player["colors"][color] = self.read_color(reader)
 
         current_loadout = {
             "armor": [],
@@ -731,33 +547,19 @@ class PlayerParser:
         }
 
         for _ in range(3):
-            current_loadout[
-                "armor"
-            ].append(
-                self.read_single_item_slot(
-                    reader
-                )
+            current_loadout["armor"].append(
+                self.read_single_item_slot(reader)
             )
 
-        for _ in range(
-            7 if version >= 124 else 5
-        ):
-            current_loadout[
-                "armor"
-            ].append(
-                self.read_single_item_slot(
-                    reader
-                )
+        for _ in range(7 if version >= 124 else 5):
+            current_loadout["armor"].append(
+                self.read_single_item_slot(reader)
             )
 
         if version >= 6:
             for _ in range(3):
-                current_loadout[
-                    "vanity"
-                ].append(
-                    self.read_single_item_slot(
-                        reader
-                    )
+                current_loadout["vanity"].append(
+                    self.read_single_item_slot(reader)
                 )
 
         vanity_count = (
@@ -769,22 +571,14 @@ class PlayerParser:
         )
 
         for _ in range(vanity_count):
-            current_loadout[
-                "vanity"
-            ].append(
-                self.read_single_item_slot(
-                    reader
-                )
+            current_loadout["vanity"].append(
+                self.read_single_item_slot(reader)
             )
 
         if version >= 47:
             for _ in range(3):
-                current_loadout[
-                    "dyes"
-                ].append(
-                    self.read_single_item_slot(
-                        reader
-                    )
+                current_loadout["dyes"].append(
+                    self.read_single_item_slot(reader)
                 )
 
         dye_count = (
@@ -796,120 +590,63 @@ class PlayerParser:
         )
 
         for _ in range(dye_count):
-            current_loadout[
-                "dyes"
-            ].append(
-                self.read_single_item_slot(
-                    reader
-                )
+            current_loadout["dyes"].append(
+                self.read_single_item_slot(reader)
             )
 
-        player["inventory"] = (
-            self.read_inventory(reader)
-        )
-
-        player["coins"] = (
-            self.read_small_inventory(reader)
-        )
+        player["inventory"] = self.read_inventory(reader)
+        player["coins"] = self.read_small_inventory(reader)
 
         if version >= 15:
-            player["ammo"] = (
-                self.read_small_inventory(reader)
-            )
+            player["ammo"] = self.read_small_inventory(reader)
         else:
             player["ammo"] = [None] * 4
 
         if version >= 136:
             player["pet"] = {
-                "item":
-                    self.read_single_item_slot(
-                        reader
-                    ),
-                "dye":
-                    self.read_single_item_slot(
-                        reader
-                    ),
+                "item": self.read_single_item_slot(reader),
+                "dye": self.read_single_item_slot(reader),
             }
 
         if version >= 117:
             player["light_pet"] = {
-                "item":
-                    self.read_single_item_slot(
-                        reader
-                    ),
-                "dye":
-                    self.read_single_item_slot(
-                        reader
-                    ),
+                "item": self.read_single_item_slot(reader),
+                "dye": self.read_single_item_slot(reader),
             }
 
             player["minecart"] = {
-                "item":
-                    self.read_single_item_slot(
-                        reader
-                    ),
-                "dye":
-                    self.read_single_item_slot(
-                        reader
-                    ),
+                "item": self.read_single_item_slot(reader),
+                "dye": self.read_single_item_slot(reader),
             }
 
             player["mount"] = {
-                "item":
-                    self.read_single_item_slot(
-                        reader
-                    ),
-                "dye":
-                    self.read_single_item_slot(
-                        reader
-                    ),
+                "item": self.read_single_item_slot(reader),
+                "dye": self.read_single_item_slot(reader),
             }
 
             player["hook"] = {
-                "item":
-                    self.read_single_item_slot(
-                        reader
-                    ),
-                "dye":
-                    self.read_single_item_slot(
-                        reader
-                    ),
+                "item": self.read_single_item_slot(reader),
+                "dye": self.read_single_item_slot(reader),
             }
 
-        player["piggy_bank"] = (
-            self.read_container(reader)
-        )
+        player["piggy_bank"] = self.read_container(reader)
 
         if version >= 20:
-            player["safe"] = (
-                self.read_container(reader)
-            )
+            player["safe"] = self.read_container(reader)
         else:
             player["safe"] = None
 
         if version >= 182:
-            player["defenders_forge"] = (
-                self.read_container(reader)
-            )
+            player["defenders_forge"] = self.read_container(reader)
         else:
             player["defenders_forge"] = None
 
-        player["void_vault"] = (
-            self.read_void_vault(reader)
-        )
-
-        player["buffs"] = (
-            self.read_buffs(reader)
-        )
-
-        player["spawn_points"] = (
-            self.read_spawn_points(reader)
-        )
+        player["void_vault"] = self.read_void_vault(reader)
+        player["buffs"] = self.read_buffs(reader)
+        player["spawn_points"] = self.read_spawn_points(reader)
 
         if version >= 16:
-            player["hotbar_locked"] = (
-                reader.boolean()
-            )
+            player["hotbar_locked"] = reader.boolean()
 
         if version >= 115:
             player["info_visibility"] = {
@@ -925,33 +662,20 @@ class PlayerParser:
 
             reader.boolean()
 
-            player[
-                "info_visibility"
-            ]["movement_speed"] = (
+            player["info_visibility"]["movement_speed"] = (
+                not reader.boolean()
+            )
+            player["info_visibility"]["treasure_finder"] = (
+                not reader.boolean()
+            )
+            player["info_visibility"]["rare_creatures_finder"] = (
+                not reader.boolean()
+            )
+            player["info_visibility"]["damage_per_second"] = (
                 not reader.boolean()
             )
 
-            player[
-                "info_visibility"
-            ]["treasure_finder"] = (
-                not reader.boolean()
-            )
-
-            player[
-                "info_visibility"
-            ]["rare_creatures_finder"] = (
-                not reader.boolean()
-            )
-
-            player[
-                "info_visibility"
-            ]["damage_per_second"] = (
-                not reader.boolean()
-            )
-
-            player[
-                "angler_quests_completed"
-            ] = reader.i32()
+            player["angler_quests_completed"] = reader.i32()
 
         if version >= 164:
             player["dpad_shortcuts"] = {
@@ -961,150 +685,81 @@ class PlayerParser:
                 "left": reader.i32(),
             }
 
-            player[
-                "ruler_enabled"
-            ] = reader.i32() == 0
-
-            player[
-                "mechanical_ruler_enabled"
-            ] = reader.i32() == 0
-
-            player[
-                "auto_paint_enabled"
-            ] = reader.i32() == 0
+            player["ruler_enabled"] = reader.i32() == 0
+            player["mechanical_ruler_enabled"] = reader.i32() == 0
+            player["auto_paint_enabled"] = reader.i32() == 0
 
             reader.i32()
 
-            player[
-                "red_wires_visibility"
-            ] = self.read_visibility(reader)
-
-            player[
-                "blue_wires_visibility"
-            ] = self.read_visibility(reader)
-
-            player[
-                "green_wires_visibility"
-            ] = self.read_visibility(reader)
-
-            player[
-                "yellow_wires_visibility"
-            ] = self.read_visibility(reader)
+            player["red_wires_visibility"] = self.read_visibility(reader)
+            player["blue_wires_visibility"] = self.read_visibility(reader)
+            player["green_wires_visibility"] = self.read_visibility(reader)
+            player["yellow_wires_visibility"] = self.read_visibility(reader)
 
         if version >= 167:
-            player[
-                "always_show_wires_and_actuators"
-            ] = reader.i32() == 0
-
-            player[
-                "actuators_visibility"
-            ] = self.read_visibility(reader)
+            player["always_show_wires_and_actuators"] = reader.i32() == 0
+            player["actuators_visibility"] = self.read_visibility(reader)
 
         if version >= 197:
-            player[
-                "tile_replacement_enabled"
-            ] = reader.i32() == 0
+            player["tile_replacement_enabled"] = reader.i32() == 0
 
         if version >= 230:
             biome_enabled = reader.i32() == 0
-
-            player[
-                "using_biome_torches"
-            ] = (
+            player["using_biome_torches"] = (
                 biome_enabled
                 if biome_torches_unlocked
                 else None
             )
 
         if version >= 181:
-            player[
-                "talked_to_bartender"
-            ] = reader.i32() == 1
+            player["talked_to_bartender"] = reader.i32() == 1
 
         if version >= 200:
             has_respawn = reader.boolean()
 
             if has_respawn:
                 ticks = reader.i32()
-
-                player[
-                    "time_to_respawn_ticks"
-                ] = ticks
-
-                player[
-                    "time_to_respawn_seconds"
-                ] = ticks / 60.0
+                player["time_to_respawn_ticks"] = ticks
+                player["time_to_respawn_seconds"] = ticks / 60.0
             else:
-                player[
-                    "time_to_respawn_ticks"
-                ] = None
-
-                player[
-                    "time_to_respawn_seconds"
-                ] = None
+                player["time_to_respawn_ticks"] = None
+                player["time_to_respawn_seconds"] = None
 
         if version >= 202:
-            player[
-                "last_saved_ticks"
-            ] = reader.i64()
+            player["last_saved_ticks"] = reader.i64()
 
         if version >= 206:
-            player[
-                "golfer_score"
-            ] = reader.i32()
+            player["golfer_score"] = reader.i32()
 
         if version >= 282:
             reader.boolean()
 
         if version >= 218:
-            count = max(
-                reader.i32(),
-                0,
-            )
-
+            count = max(reader.i32(), 0)
             researched = {}
 
             for _ in range(count):
                 code_name = reader.cs_string()
-
                 amount = reader.i32()
-
                 researched[code_name] = amount
 
             player["researched_items"] = researched
 
         if version >= 214:
             flags = reader.u8()
-
             player["temporary_items"] = {}
 
             if flags & 1:
-                player[
-                    "temporary_items"
-                ]["mouse"] = (
-                    self.read_item_slot(reader)
-                )
+                player["temporary_items"]["mouse"] = self.read_item_slot(reader)
 
             if flags >> 1 & 1:
-                player[
-                    "temporary_items"
-                ]["research"] = (
-                    self.read_item_slot(reader)
-                )
+                player["temporary_items"]["research"] = self.read_item_slot(reader)
 
             if flags >> 2 & 1:
-                player[
-                    "temporary_items"
-                ]["guide"] = (
-                    self.read_item_slot(reader)
-                )
+                player["temporary_items"]["guide"] = self.read_item_slot(reader)
 
             if flags >> 3 & 1:
-                player[
-                    "temporary_items"
-                ]["goblin"] = (
-                    self.read_item_slot(reader)
-                )
+                player["temporary_items"]["goblin"] = self.read_item_slot(reader)
 
         if version >= 220:
             player["journey_settings"] = {}
@@ -1113,46 +768,24 @@ class PlayerParser:
                 key = reader.i16()
 
                 if key == 5:
-                    player[
-                        "journey_settings"
-                    ]["godmode"] = (
-                        reader.boolean()
-                    )
-
+                    player["journey_settings"]["godmode"] = reader.boolean()
                 elif key == 11:
-                    player[
-                        "journey_settings"
-                    ]["far_placement"] = (
-                        reader.boolean()
-                    )
-
+                    player["journey_settings"]["far_placement"] = reader.boolean()
                 elif key == 14:
-                    player[
-                        "journey_settings"
-                    ]["spawn_rate"] = (
-                        reader.f32()
-                    )
+                    player["journey_settings"]["spawn_rate"] = reader.f32()
 
         if version >= 253:
             value = reader.u8()
 
             if value & 1:
-                player[
-                    "super_cart_enabled"
-                ] = (
-                    value & 2
-                ) != 0
+                player["super_cart_enabled"] = (value & 2) != 0
             else:
-                player[
-                    "super_cart_enabled"
-                ] = None
+                player["super_cart_enabled"] = None
 
         if version >= 262:
-            player["loadouts"] = (
-                self.read_loadouts(
-                    reader,
-                    current_loadout,
-                )
+            player["loadouts"] = self.read_loadouts(
+                reader,
+                current_loadout,
             )
         else:
             player["loadouts"] = None
@@ -1163,22 +796,14 @@ class PlayerParser:
             player["voice"] = None
 
         if version >= 281:
-            player[
-                "voice_pitch_offset"
-            ] = reader.f32()
+            player["voice_pitch_offset"] = reader.f32()
 
         if version >= 300:
-            count = max(
-                reader.i32(),
-                0,
-            )
-
+            count = max(reader.i32(), 0)
             refunds = []
 
             for _ in range(count):
-                item = self.read_item_slot(
-                    reader
-                )
+                item = self.read_item_slot(reader)
 
                 if item is not None:
                     refunds.append(item)
@@ -1186,26 +811,15 @@ class PlayerParser:
             player["refunds"] = refunds
 
         if version >= 310:
-            count = max(
-                reader.i32(),
-                0,
-            )
-
+            count = max(reader.i32(), 0)
             dialogues = []
 
             for _ in range(count):
-                dialogues.append(
-                    reader.cs_string()
-                )
+                dialogues.append(reader.cs_string())
 
-            player[
-                "one_time_dialogues_seen"
-            ] = dialogues
+            player["one_time_dialogues_seen"] = dialogues
 
         player["_parser_offset"] = reader.tell()
-
-        player["_remaining_bytes"] = (
-            reader.remaining()
-        )
+        player["_remaining_bytes"] = reader.remaining()
 
         return player
